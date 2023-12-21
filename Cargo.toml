@@ -1,0 +1,4 @@
+[workspace]
+members = [
+  "cypher_character_model"
+]
