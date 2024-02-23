@@ -1,0 +1,15 @@
+{% extends "../base.html" %}
+
+{% block title %}Cypher System - Character Sheet{% endblock %}
+
+{% block content %}
+<div id="character-sheet" hx-get="/character" hx-trigger="updatedCharacter from:Body">
+    <h1 class="text-center">Cypher System - Character Sheet</h1>
+
+    {% include "sentence.html" %}
+
+    {% include "view.html" %}
+    
+</div>
+
+{% endblock %}

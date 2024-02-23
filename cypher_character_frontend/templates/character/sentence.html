@@ -1,0 +1,14 @@
+{% block content %}
+<div class="text-center py-4 fs-3" id="sentence">
+    <span class="text-primary" id="name">{{ character.name }}</span>
+    <span class="text-success-emphasis" id="pronouns">({{ character.pronouns }})</span> is a
+    <span class="text-danger-emphasis" id="descriptor">{{ character.sentence.descriptor }}</span>
+    <span class="text-danger" id="character-type">{{ character.sentence.character_type }}</span>
+    {% match character.sentence.flavor %}
+        {% when Some with (flavor) %}
+        <span class="text-info-emphasis" id="flavor">({{ flavor }})</span>
+        {% when None %}
+    {% endmatch %}
+    who <span class="text-warning" id="focus">{{ character.sentence.focus }}</span>
+</div>
+{% endblock %}

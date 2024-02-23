@@ -33,7 +33,15 @@
 
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+        htmlFilter = path: _type: builtins.match ".*html$" path != null;
+
+        srcFilter = path: type: (htmlFilter path type)
+          || (craneLib.filterCargoSources path type);
+
+        src = pkgs.lib.cleanSourceWith {
+          src = craneLib.path ./.;
+          filter = srcFilter;
+        };
 
         commonArgs = {
           inherit src;
