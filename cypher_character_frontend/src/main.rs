@@ -25,7 +25,9 @@ async fn main() -> anyhow::Result<()> {
     let router = Router::new()
         .nest("/api", api_router)
         .route("/", get(hello))
-        .route("/another-page", get(another_page));
+        .route("/another-page", get(another_page))
+        .route("/character-sheet", get(character_sheet));
+
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000")
         .await
         .context("error creating listener")?;
@@ -36,6 +38,29 @@ async fn main() -> anyhow::Result<()> {
         .context("error while starting server")?;
 
     Ok(())
+}
+
+async fn character_sheet() -> impl IntoResponse {
+    let template = CharacterSheetTemplate {
+        name: "Tacos".to_string(),
+        pronouns: "sal/sa".to_string(),
+        descriptor: "Delicious".to_string(),
+        cypher_type: "Avocado".to_string(),
+        focus: "Satiates the Hungry".to_string(),
+        flavor: "Spicy".to_string(),
+    };
+    HtmlTemplate(template)
+}
+
+#[derive(Template)]
+#[template(path = "character-sheet.html")]
+struct CharacterSheetTemplate {
+    name: String,
+    pronouns: String,
+    descriptor: String,
+    cypher_type: String,
+    focus: String,
+    flavor: String,
 }
 
 async fn hello_from_the_server() -> &'static str {

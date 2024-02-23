@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Cypher System - Character Sheet{% endblock %}
+
+{% block content %}
+<h1>Cypher System - Charater Sheet</h1>
+<span id="name">{{ name }}</span>
+<span id="pronouns">({{ pronouns }})</span> is a
+<span id="descriptor">{{ descriptor }}</span>
+<span id="cypher-type">{{ cypher_type }}</span>
+<span id="flavor">({{ flavor }})</span> Who
+<span id="focus">{{ focus }}</span>
+{% endblock %}
