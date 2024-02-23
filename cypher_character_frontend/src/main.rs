@@ -40,16 +40,15 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn character_sheet() -> impl IntoResponse {
-    let template = CharacterSheetTemplate {
+async fn character_sheet() -> CharacterSheetTemplate {
+    CharacterSheetTemplate {
         name: "Tacos".to_string(),
         pronouns: "sal/sa".to_string(),
         descriptor: "Delicious".to_string(),
         cypher_type: "Avocado".to_string(),
         focus: "Satiates the Hungry".to_string(),
         flavor: "Spicy".to_string(),
-    };
-    HtmlTemplate(template)
+    }
 }
 
 #[derive(Template)]
@@ -68,8 +67,7 @@ async fn hello_from_the_server() -> &'static str {
 }
 
 async fn another_page() -> impl IntoResponse {
-    let template = AnotherPageTemplate {};
-    HtmlTemplate(template)
+    AnotherPageTemplate {}
 }
 
 #[derive(Template)]
@@ -77,33 +75,9 @@ async fn another_page() -> impl IntoResponse {
 struct AnotherPageTemplate;
 
 async fn hello() -> impl IntoResponse {
-    let template = HelloTemplate {};
-    HtmlTemplate(template)
+    HelloTemplate {}
 }
 
 #[derive(Template)]
 #[template(path = "hello.html")]
 struct HelloTemplate;
-
-/// A wrapper type that we'll use to encapsulate HTML parsed by askama into valid HTML for axum to serve.
-struct HtmlTemplate<T>(T);
-
-/// Allows us to convert Askama HTML templates into valid HTML for axum to serve in the response.
-impl<T> IntoResponse for HtmlTemplate<T>
-where
-    T: Template,
-{
-    fn into_response(self) -> Response {
-        // Attempt to render the template with askama
-        match self.0.render() {
-            // If we're able to successfully parse and aggregate the template, serve it
-            Ok(html) => Html(html).into_response(),
-            // If we're not, return an error or some bit of fallback HTML
-            Err(err) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Failed to render template. Error: {}", err),
-            )
-                .into_response(),
-        }
-    }
-}
