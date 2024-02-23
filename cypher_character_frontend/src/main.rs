@@ -19,19 +19,37 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-        info!("initializing router...");
+    info!("initializing router...");
+    let api_router = Router::new().route("/hello", get(hello_from_the_server));
 
-        
-        let router = Router::new().route("/", get(hello));
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.context("error creating listener")?;
+    let router = Router::new()
+        .nest("/api", api_router)
+        .route("/", get(hello))
+        .route("/another-page", get(another_page));
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:8000")
+        .await
+        .context("error creating listener")?;
 
-        info!("router initialized, now listening on port 8000");
-        axum::serve(listener, router)
-            .await
-            .context("error while starting server")?;
-    
-        Ok(())
+    info!("router initialized, now listening on port 8000");
+    axum::serve(listener, router)
+        .await
+        .context("error while starting server")?;
+
+    Ok(())
 }
+
+async fn hello_from_the_server() -> &'static str {
+    "Hello!"
+}
+
+async fn another_page() -> impl IntoResponse {
+    let template = AnotherPageTemplate {};
+    HtmlTemplate(template)
+}
+
+#[derive(Template)]
+#[template(path = "another-page.html")]
+struct AnotherPageTemplate;
 
 async fn hello() -> impl IntoResponse {
     let template = HelloTemplate {};

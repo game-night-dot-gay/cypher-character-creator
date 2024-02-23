@@ -1,1 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Hello!{% endblock %}
+
+{% block content %}
 <h1>Howdy!</h1>
+<a href="/another-page">Another page</a>
+<button type="button" hx-get="/api/hello" hx-swap="innerHtml">Say hello</button>
+{% endblock %}
