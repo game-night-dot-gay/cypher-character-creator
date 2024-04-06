@@ -2,3 +2,5 @@
 members = [
   "cypher_character_model"
 ]
+
+resolver = "2"
