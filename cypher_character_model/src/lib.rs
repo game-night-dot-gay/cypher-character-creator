@@ -1,3 +1,45 @@
+//! # The GameNight.gay `cypher_character_model` library
+//!
+//! ## Purpose
+//!
+//! This library provides a Rust implementation that is compatible with Monte
+//! Cook Games' Cypher System
+//!
+//! ## [`Character`]
+//!
+//! The main attributes associated with your character from a high-level. The
+//! choices made in the `sentence` will impact your [`CharacterStats`], as well
+//! as your available skills and abilities.
+//!
+//! ```
+//! # use cypher_character_model::{Character, Sentence};
+//! let character = Character {
+//!   name: "Ferris".to_string(),
+//!   pronouns: "any".to_string(),
+//!   sentence: Sentence {
+//!     descriptor: "TODO".to_string(),
+//!     character_type: "TODO".to_string(),
+//!     flavor: Some("TODO".to_string()),
+//!     focus: "TODO".to_string(),
+//!   }
+//! };
+//! assert_eq!(&character.to_string(), "Ferris (any) is a TODO TODO (TODO) who TODO");
+//! ```
+//!
+//! ## [`CharacterStats`]
+//!
+//! The lower-level attributes associated with your character. Once you have
+//! your character sentence, that will guide the allocation of points into
+//! your might, speed, and intellect pools.
+//!
+//! ```
+//! # use cypher_character_model::CharacterStats;
+//! // Create a new, Level 1 character with the following might, speed, and intelligence stats
+//! let stats = CharacterStats::new(12, 1, 10, 0, 10, 0);
+//! ```
+
+#![warn(missing_docs)]
+
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
@@ -75,9 +117,9 @@ impl CharacterStats {
             might: Pool::new(might_pool, might_edge),
             speed: Pool::new(speed_pool, speed_edge),
             intellect: Pool::new(intellect_pool, intellect_edge),
-            recovery_rolls: RecoveryRolls::new(),
-            damage_track: DamageTrack::new(),
-            advancement: Advancement::new(),
+            recovery_rolls: RecoveryRolls::default(),
+            damage_track: DamageTrack::Hale,
+            advancement: Advancement::default(),
         }
     }
 
@@ -107,7 +149,10 @@ impl CharacterStats {
                 pool.edge
             );
         }
-        let points_to_spend = 3 + (effort_level - 1) * 2 - edge;
+        let mut points_to_spend = 3 + (effort_level - 1) * 2 - edge;
+        if self.damage_track != DamageTrack::Hale {
+            points_to_spend += effort_level;
+        }
         if points_to_spend >= pool.current {
             eyre::bail!("Attempted to spend all of the {effort_type} pool points (max {}): {points_to_spend}", pool.current);
         }
@@ -162,7 +207,7 @@ impl Pool {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct RecoveryRolls {
     one_action: bool,
     ten_minutes: bool,
@@ -170,51 +215,20 @@ pub struct RecoveryRolls {
     ten_hours: bool,
 }
 
-impl RecoveryRolls {
-    pub fn new() -> Self {
-        Self {
-            one_action: false,
-            ten_minutes: false,
-            one_hour: false,
-            ten_hours: false,
-        }
-    }
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub enum DamageTrack {
+    Hale,
+    Impaired,
+    Debilitated,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct DamageTrack {
-    impaired: bool,
-    debilitated: bool,
-}
-
-impl DamageTrack {
-    pub fn new() -> Self {
-        Self {
-            impaired: false,
-            debilitated: false,
-        }
-    }
-}
-
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Advancement {
     increase_capabilities: bool,
     move_toward_perfection: bool,
     extra_effort: bool,
     skill_training: bool,
     other: bool,
-}
-
-impl Advancement {
-    pub fn new() -> Self {
-        Self {
-            increase_capabilities: false,
-            move_toward_perfection: false,
-            extra_effort: false,
-            skill_training: false,
-            other: false,
-        }
-    }
 }
 
 #[cfg(test)]
@@ -317,17 +331,37 @@ mod tests {
         character_stats.effort = 2;
 
         character_stats.spend_effort(EffortType::Might, 1, 1)?;
-
         assert_eq!(
             character_stats.might.current, 8,
             "Spending 1 level of effort with 1 edge costs 2 points"
         );
 
         character_stats.spend_effort(EffortType::Might, 2, 1)?;
-
         assert_eq!(
             character_stats.might.current, 4,
             "Spending 2 levels of effort with 1 edge costs 4 points"
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn spending_effort_should_cost_extra_when_impaired() -> eyre::Result<()> {
+        let mut character_stats = CharacterStats::new(10, 1, 5, 0, 5, 0);
+        character_stats.effort = 2;
+        character_stats.speed.current = 0;
+        character_stats.damage_track = DamageTrack::Impaired;
+
+        character_stats.spend_effort(EffortType::Might, 1, 1)?;
+        assert_eq!(
+            character_stats.might.current, 7,
+            "Spending 1 level of effort with 1 edge (while impaired) costs 3 points"
+        );
+
+        character_stats.spend_effort(EffortType::Might, 2, 1)?;
+        assert_eq!(
+            character_stats.might.current, 1,
+            "Spending 2 levels of effort with 1 edge (while impaired) costs 6 points"
         );
 
         Ok(())
