@@ -14,16 +14,19 @@
 //! ```
 //! # use cypher_character_model::{Character, Sentence};
 //! let character = Character {
-//!   name: "Ferris".to_string(),
-//!   pronouns: "any".to_string(),
-//!   sentence: Sentence {
-//!     descriptor: "TODO".to_string(),
-//!     character_type: "TODO".to_string(),
-//!     flavor: Some("TODO".to_string()),
-//!     focus: "TODO".to_string(),
-//!   }
+//!     name: "Ferris".to_string(),
+//!     pronouns: "any".to_string(),
+//!     sentence: Sentence {
+//!       descriptor: "Fast".to_string(),
+//!       character_type: "Explorer".to_string(),
+//!       flavor: Some("Technology".to_string()),
+//!       focus: "Helps Their Friends".to_string(),
+//!     }
 //! };
-//! assert_eq!(&character.to_string(), "Ferris (any) is a TODO TODO (TODO) who TODO");
+//! assert_eq!(
+//!     &character.to_string(),
+//!     "Ferris (any) is a Fast Explorer (Technology) who Helps Their Friends"
+//! );
 //! ```
 //!
 //! ## [`CharacterStats`]
@@ -65,11 +68,33 @@ impl Display for Character {
 }
 
 /// Sentence is the high-level description of the character
+///
+/// The Sentence determines lower-level capabilitis such as skills and
+/// abilities.
+///
+/// ([Cypher System Sentence
+/// Information](https://cypher-system.com/cypher-system-characters/))
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Sentence {
+    /// The "adjective" of the sentence
     pub descriptor: String,
+
+    /// The "noun" of the sentence
+    ///
+    /// This determines the core of your character. The base ruleset has four
+    /// character types (Warrior, Adept, Explorer, and Speaker).
     pub character_type: String,
+
+    /// An optional modifier for the [`character_type`]
+    ///
+    /// This allows for flavoring the character type to your campaign's setting
+    /// and your goals. Without delving any deeper, a "Stealthy" flavor Explorer
+    /// and a "Technology" flavor Explorer bring to mind different archtypes.
     pub flavor: Option<String>,
+
+    /// The "verb" of the sentence
+    ///
+    /// This rounds out the character and makes them unique within the party.
     pub focus: String,
 }
 
