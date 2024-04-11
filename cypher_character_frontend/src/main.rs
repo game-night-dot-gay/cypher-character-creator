@@ -3,7 +3,11 @@ use std::{borrow::Borrow, sync::Arc};
 use anyhow::Context;
 use askama::Template;
 use axum::{
-    extract::State, http::{header, StatusCode}, response::{Html, IntoResponse, Response}, routing::{get, post, put}, Form, Router
+    extract::State,
+    http::{header, StatusCode},
+    response::{Html, IntoResponse, Response},
+    routing::{get, post, put},
+    Form, Router,
 };
 use cypher_character_model::Character;
 use cypher_character_model::Sentence;
@@ -27,8 +31,6 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    
-
     let app_state = Arc::new(AppState {
         character: Mutex::new(Character {
             name: "Tacos".to_string(),
@@ -43,8 +45,7 @@ async fn main() -> anyhow::Result<()> {
     });
 
     info!("initializing router...");
-    let api_router = Router::new()
-        .route("/v1/character", put(update_character));
+    let api_router = Router::new().route("/v1/character", put(update_character));
 
     let router = Router::new()
         .nest("/api", api_router)
@@ -66,8 +67,6 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-
-
 #[derive(Template)]
 #[template(path = "character/sheet.html")]
 struct CharacterSheetTemplate {
@@ -75,7 +74,6 @@ struct CharacterSheetTemplate {
 }
 
 async fn character_sheet(State(state): State<Arc<AppState>>) -> CharacterSheetTemplate {
-
     CharacterSheetTemplate {
         character: state.character.lock().await.clone(),
     }
@@ -88,7 +86,6 @@ struct CharacterEditTemplate {
 }
 
 async fn character_edit(State(state): State<Arc<AppState>>) -> CharacterEditTemplate {
-
     CharacterEditTemplate {
         character: state.character.lock().await.clone(),
     }
@@ -101,7 +98,6 @@ struct CharacterViewTemplate {
 }
 
 async fn character_view(State(state): State<Arc<AppState>>) -> CharacterViewTemplate {
-
     CharacterViewTemplate {
         character: state.character.lock().await.clone(),
     }
@@ -118,34 +114,34 @@ struct CharacterRequest {
 }
 
 async fn update_character(
-        State(state): State<Arc<AppState>>, 
-        Form(form): Form<CharacterRequest>) 
-    -> impl IntoResponse {
-        let mut lock = state.character.lock().await;
+    State(state): State<Arc<AppState>>,
+    Form(form): Form<CharacterRequest>,
+) -> impl IntoResponse {
+    let mut lock = state.character.lock().await;
 
-        if let Some(name) = form.name {
-            lock.name = name;
-        }
+    if let Some(name) = form.name {
+        lock.name = name;
+    }
 
-        if let Some(pronouns) = form.pronouns {
-            lock.pronouns = pronouns;
-        }
+    if let Some(pronouns) = form.pronouns {
+        lock.pronouns = pronouns;
+    }
 
-        if let Some(descriptor) = form.descriptor {
-            lock.sentence.descriptor = descriptor;
-        }
+    if let Some(descriptor) = form.descriptor {
+        lock.sentence.descriptor = descriptor;
+    }
 
-        if let Some(character_type) = form.character_type {
-            lock.sentence.character_type = character_type;
-        }
+    if let Some(character_type) = form.character_type {
+        lock.sentence.character_type = character_type;
+    }
 
-        if let Some(flavor) = form.flavor {
-            lock.sentence.flavor = Some(flavor);
-        }
+    if let Some(flavor) = form.flavor {
+        lock.sentence.flavor = Some(flavor);
+    }
 
-        if let Some(focus) = form.focus {
-            lock.sentence.focus = focus;
-        }
-        
-        [("HX-Trigger", "updatedCharacter")]
+    if let Some(focus) = form.focus {
+        lock.sentence.focus = focus;
+    }
+
+    [("HX-Trigger", "updatedCharacter")]
 }
