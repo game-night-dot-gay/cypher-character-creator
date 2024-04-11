@@ -1,5 +1,6 @@
 [workspace]
-members = [ "cypher_character_frontend",
+members = [ 
+  "cypher_character_frontend",
   "cypher_character_model"
 ]
 resolver = "2"
