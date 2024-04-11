@@ -46,7 +46,7 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
-/// Character is the entry-point to the data model
+/// `Character` is the entry-point to the data model
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Character {
     /// The name of the character
@@ -67,7 +67,7 @@ impl Display for Character {
     }
 }
 
-/// Sentence is the high-level description of the character
+/// `Sentence` is the high-level description of the character
 ///
 /// The Sentence determines lower-level capabilitis such as skills and
 /// abilities.
@@ -113,6 +113,11 @@ impl Display for Sentence {
     }
 }
 
+/// `CharacterStats` is the specific data about a character at a point in time
+///
+/// The stats cover things like level, pools, damage, recovery etc. This struct
+/// provides an interface for creating a character based on the high-level
+/// sentence, and an interface for tracking a character over the course of play.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CharacterStats {
     tier: Tier,
@@ -127,6 +132,10 @@ pub struct CharacterStats {
 }
 
 impl CharacterStats {
+    /// Construct a new, Level 1 character
+    ///
+    /// Currently, this function does not attempt to validate the values added
+    /// to the pools and edges.
     pub fn new(
         might_pool: u8,
         might_edge: u8,
@@ -148,6 +157,11 @@ impl CharacterStats {
         }
     }
 
+    /// Modifies the character based on a certain level of effort and edge
+    ///
+    /// This function validates that there is enough effort and edge available,
+    /// as well as tracking the impact of the damage track on the cost of
+    /// effort.
     pub fn spend_effort(
         &mut self,
         effort_type: EffortType,
@@ -187,20 +201,31 @@ impl CharacterStats {
     }
 }
 
+/// `Tier` is the level of a character, from 1-6
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Tier {
+    /// First tier
     One,
+    /// Second tier
     Two,
+    /// Third tier
     Three,
+    /// Fourth tier
     Four,
+    /// Fifth tier
     Five,
+    /// Sixth tier
     Six,
 }
 
+/// `EffortType` is the different categorization of pools
 #[derive(Debug, Deserialize, Serialize)]
 pub enum EffortType {
+    /// Effort related to physical tasks
     Might,
+    /// Effort related to movement/range tasks
     Speed,
+    /// Effort related to knowledge and interpersonal tasks
     Intellect,
 }
 
@@ -215,6 +240,11 @@ impl Display for EffortType {
     }
 }
 
+/// `Pool` is a collection of skill points and skill edge
+///
+/// There is one pool per [`EffortType`]. Pools have a maximum number of points,
+/// a current number of points, and a level of edge that impacts how many points
+/// are needed to apply levels of effort.
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Pool {
     current: u8,
@@ -223,6 +253,7 @@ pub struct Pool {
 }
 
 impl Pool {
+    /// Construct a new pool with the maximum current number of points
     pub fn new(max: u8, edge: u8) -> Self {
         Self {
             current: max,
@@ -232,6 +263,9 @@ impl Pool {
     }
 }
 
+/// `RecoveryRolls` tracks the actions a character has taken to recover in a day
+///
+/// There are four rolls per day: 1 action, 10 minutes, 1 hour, and 10 hours.
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct RecoveryRolls {
     one_action: bool,
@@ -240,13 +274,39 @@ pub struct RecoveryRolls {
     ten_hours: bool,
 }
 
+/// `DamageTrack` tracks the level of damage a character has experienced
+///
+/// Characters go down the damage track when a pool goes to zero points or when
+/// an effect specifically causes it. Characters can go back up the damage track
+/// through being healed or performing recovery rolls.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub enum DamageTrack {
+    /// Fully healthy
     Hale,
+    /// One pool reduced to zero points
+    ///
+    /// - Levels of effort cost 1 additional point per level
+    /// - Major and minor effects are ignored
+    /// - 17-20 rolls only do +1 damage
     Impaired,
+    /// Two pools reduced to zero points
+    ///
+    /// - Cannot move more than an immediate distance
+    /// - Cannot move at all if the speed pool is at 0
     Debilitated,
 }
 
+/// `Advancement` tracks character progression towards levelling up
+///
+/// Advancements cost 4xp and each advancement can only be done at most once per
+/// level. A character reaches the next level after four advancements.
+///
+/// - Increase Capabilities: +4 points to a character's stat pools
+/// - Move Toward Perfection: +1 edge
+/// - Extra Effort: +1 effort
+/// - Skill Training: train a new skill, become specialized in a trained skill,
+///   or remove an inhibition in an inhibited skill
+/// - Other: An agreed upon character advancement between the player and GM
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Advancement {
     increase_capabilities: bool,
