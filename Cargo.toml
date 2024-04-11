@@ -1,7 +1,7 @@
 [workspace]
-members = [
+members = [ 
+  "cypher_character_frontend",
   "cypher_character_model"
 ]
-
 resolver = "2"
 edition = "2021"

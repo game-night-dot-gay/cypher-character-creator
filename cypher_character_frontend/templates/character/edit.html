@@ -1,0 +1,51 @@
+{% block character %}
+<div id="character-edit" hx-target="this" hx-swap="outerHTML">
+    <form
+        hx-put="/api/v1/character"
+    >
+    <div class="row">
+        <div class="col">
+            <label class="form-label" for="name">Name</label>
+            <input class="form-control" type="text" name="name" id="name" placeholder="Name" value="{{ character.name }}"/>
+        </div>
+        <div class="col">
+            <label class="form-label" for="pronouns">Pronouns</label>
+            <input class="form-control" type="text" name="pronouns" id="pronouns" placeholder="they/them" value="{{ character.pronouns }}"/>
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Descriptor</label>
+            <input class="form-control" type="text" name="descriptor" id="descriptor" placeholder="Descriptor" value="{{ character.sentence.descriptor }}"/>
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Type</label>
+            <input class="form-control" type="text" name="character_type" id="character_type" placeholder="Type" value="{{ character.sentence.character_type }}"/>
+            
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label class="form-label" for="descriptor">Flavor</label>
+            {% match character.sentence.flavor %}
+                {% when Some with (flavor) %}
+                <input class="form-control" type="text" name="flavor" id="flavor" placeholder="Flavor" value="{{ flavor }}"/>
+                {% when None %}
+                <input class="form-control" type="text" name="flavor" id="flavor" placeholder="Flavor" value=""/>
+            {% endmatch %}
+            
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Focus</label>
+            <input class="form-control" type="text" name="focus" id="focus" placeholder="Focus" value="{{ character.sentence.focus }}"/>
+            
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col gy-2">
+            <button class ="btn btn-primary rounded-pill px-3" type="submit">Submit</button>
+            <button class ="btn btn-primary rounded-pill px-3" hx-get="/character/view" type="submit">Cancel</button>
+        </div>
+    </div>
+    </form>
+</div>
+{% endblock %}

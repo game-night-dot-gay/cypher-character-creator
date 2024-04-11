@@ -1,0 +1,48 @@
+
+{% block character %}
+<div id="character-view" hx-target="this" hx-swap="outerHTML">
+
+    <div class="row">
+        <div class="col">
+            <label class="form-label" for="name">Name</label>
+            <div>{{ character.name }}</div>
+        </div>
+        <div class="col">
+            <label class="form-label" for="pronouns">Pronouns</label>
+            <div>{{ character.pronouns }}</div>
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Descriptor</label>
+            <div>{{ character.sentence.descriptor }}</div>
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Type</label>
+            <div>{{ character.sentence.character_type }}</div>
+            
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <label class="form-label" for="descriptor">Flavor</label>
+            {% match character.sentence.flavor %}
+                {% when Some with (flavor) %}
+                <div>{{ flavor }}</div>
+                {% when None %}
+                <div>&nbsp;</div>
+            {% endmatch %}
+            
+        </div>
+        <div class="col">
+            <label class="form-label" for="descriptor">Focus</label>
+            <div>{{ character.sentence.focus }}</div>
+            
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col gy-2">
+            <button class ="btn btn-primary rounded-pill px-3" hx-get="/character/edit" type="submit">Edit</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

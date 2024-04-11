@@ -47,7 +47,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
 /// `Character` is the entry-point to the data model
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Character {
     /// The name of the character
     pub name: String,
@@ -74,7 +74,7 @@ impl Display for Character {
 ///
 /// ([Cypher System Sentence
 /// Information](https://cypher-system.com/cypher-system-characters/))
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Sentence {
     /// The "adjective" of the sentence
     pub descriptor: String,
